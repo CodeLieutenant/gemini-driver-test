@@ -1,0 +1,35 @@
+# Create me 3 scylladb nodes
+networks:
+  scylladbtest:
+    name: scylladbtest
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.101.0/24
+
+services:
+  scylla1:
+    image: scylladb/scylla:6.1
+    container_name: scylla1
+    restart: unless-stopped
+    command: --smp=1 --memory 512M --developer-mode 1
+    environment:
+      - "SCYLLA_JMX_ADDR=-ja 0.0.0.0"
+      - "SCYLLA_JMX_REMOTE=-r"
+    networks:
+      scylladbtest:
+    volumes:
+      - ./docker/scylladb/cassandra-rackdc.properties:/etc/scylla/cassandra-rackdc.properties
+  scylla2:
+    image: scylladb/scylla:6.1
+    container_name: scylla2
+    restart: unless-stopped
+    command: --smp=1 --seeds=scylla1 --developer-mode 1 --memory 512M
+    environment:
+      - "SCYLLA_JMX_ADDR=-ja 0.0.0.0"
+      - "SCYLLA_JMX_REMOTE=-r"
+    networks:
+      scylladbtest:
+    volumes:
+      - ./docker/scylladb/cassandra-rackdc.properties:/etc/scylla/cassandra-rackdc.properties
